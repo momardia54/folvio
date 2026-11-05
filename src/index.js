@@ -1,3 +1,4 @@
+import {ensureMigrated} from "./migrate.js";
 import {
   random,
   hash,
@@ -179,6 +180,7 @@ function settings(b, c = {}) {
   return out;
 }
 async function api(r, e) {
+  await ensureMigrated(e.DB);
   const u = new URL(r.url),
     p = u.pathname.split("/").filter(Boolean),
     method = r.method;
@@ -743,6 +745,7 @@ async function api(r, e) {
   fail(405, "Unsupported operation.");
 }
 export async function cleanup(e) {
+  await ensureMigrated(e.DB);
   const expired = await rows(
     e,
     "SELECT * FROM uploads WHERE state!='complete' AND expires<? LIMIT 5",

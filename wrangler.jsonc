@@ -15,7 +15,6 @@
     {
       "binding": "DB",
       "database_name": "folvio-db",
-      "database_id": "replace-after-creation",
       "migrations_dir": "migrations"
     }
   ],

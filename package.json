@@ -12,7 +12,8 @@
     "test": "node --test tests/*.test.js",
     "test:runtime": "node --test tests/runtime/*.test.js",
     "test:browser": "node --test tests/browser/*.test.js",
-    "test:staging": "node scripts/test-staging.mjs"
+    "test:staging": "node scripts/test-staging.mjs",
+    "prebuild": "node scripts/generate-migrations.mjs"
   },
   "devDependencies": {
     "miniflare": "5.20261103.0-beta",

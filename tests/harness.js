@@ -7,7 +7,22 @@ export class Miniflare {
     this.parts = new Map();
     const database = this.db;
     this.DB = {
-      exec: async (sql) => database.exec(sql),
+      exec: async (sql) => {
+        database.exec(sql);
+        database.exec(
+          "CREATE TABLE IF NOT EXISTS d1_migrations (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)",
+        );
+        const names = [];
+        if (sql.includes("CREATE TABLE sessions")) names.push("0001_init.sql");
+        if (sql.includes("ADD COLUMN revision"))
+          names.push("0002_collection_revisions.sql");
+        if (sql.includes("CREATE TABLE folder_links"))
+          names.push("0003_folder_links.sql");
+        for (const name of names)
+          database
+            .prepare("INSERT OR IGNORE INTO d1_migrations(name) VALUES (?)")
+            .run(name);
+      },
       prepare(sql) {
         let args = [];
         const statement = {
@@ -51,7 +66,14 @@ export class Miniflare {
       resumeMultipartUpload(key, id) {
         return {
           async uploadPart(n, data) {
-            uploads.get(id).set(n, data instanceof ReadableStream ? new Uint8Array(await new Response(data).arrayBuffer()) : new Uint8Array(data));
+            uploads
+              .get(id)
+              .set(
+                n,
+                data instanceof ReadableStream
+                  ? new Uint8Array(await new Response(data).arrayBuffer())
+                  : new Uint8Array(data),
+              );
             return { partNumber: n, etag: "etag-" + n };
           },
           async complete(parts) {
@@ -70,7 +92,15 @@ export class Miniflare {
           },
         };
       },
-      async get(key) { const object = objects.get(key);return object ? {...object,body:new Blob([new Uint8Array(object.size)]).stream()} : null; },
+      async get(key) {
+        const object = objects.get(key);
+        return object
+          ? {
+              ...object,
+              body: new Blob([new Uint8Array(object.size)]).stream(),
+            }
+          : null;
+      },
       async head(key) {
         return objects.get(key) || null;
       },

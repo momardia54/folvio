@@ -33,6 +33,8 @@ Initial pre-release implementation, verified locally and on isolated Cloudflare 
 
 ### Fixed
 
+- Fix Cloudflare default deployments failing with error 10021: remove the placeholder D1 ID, use native resource provisioning, and apply bundled schema migrations automatically through the Worker binding. `npx wrangler deploy` now works without a custom deploy command. Verified on fresh Cloudflare D1/R2 resources.
+
 - Reject non-object JSON bodies and malformed multipart entries with client errors.
 - Track collection revisions so concurrent folder permission edits and moves cannot overwrite a stale snapshot. Migration `0002_collection_revisions.sql` is required.
 - Enforce the folder count limit inside the insert statement.

@@ -23,9 +23,7 @@ test("collection permissions and multipart lifecycle through real local D1/R2", 
   );
   try {
     const db = await mf.getD1Database("DB");
-    for (const file of (await readdir('migrations')).sort()) {
-      await db.exec((await readFile('migrations/'+file,'utf8')).replace(/\n/g,' '));
-    }
+
     async function req(path, method = "GET", data, cookie = "") {
       const response = await mf.dispatchFetch("http://localhost/api/" + path, {
         method,
@@ -183,8 +181,16 @@ test("collection permissions and multipart lifecycle through real local D1/R2", 
       ).status,
       400,
     );
-    const uploadResponse = await mf.dispatchFetch(part.data.url, {method:'PUT', headers:{cookie:rc,'content-length':'5'},body:new TextEncoder().encode('hello')});
-    assert.equal(uploadResponse.status,200,await uploadResponse.clone().text());
+    const uploadResponse = await mf.dispatchFetch(part.data.url, {
+      method: "PUT",
+      headers: { cookie: rc, "content-length": "5" },
+      body: new TextEncoder().encode("hello"),
+    });
+    assert.equal(
+      uploadResponse.status,
+      200,
+      await uploadResponse.clone().text(),
+    );
     const uploaded = await uploadResponse.json();
     const complete = await req(
       share + "/uploads/" + init.data.id + "/complete",

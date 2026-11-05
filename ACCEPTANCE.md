@@ -5,7 +5,7 @@ Verified on 2026-11-04 using Node 22, Chrome, Miniflare and an isolated Cloudfla
 ## Passing checks
 
 - Clean independent `npm ci`; dependency audit reports zero vulnerabilities.
-- Production bundle builds; 15 in-process security/API/hardening tests pass.
+- Production bundle builds; 17 in-process security/API/hardening tests pass.
 - Cloudflare-emulator test passes with real local D1/R2, including streaming a part through the Worker.
 - Chrome desktop (1440 px) and mobile (390 px) tests pass without horizontal overflow or page errors.
 - Browser coverage: login, collection wizard, nested folders, rename/move/delete, recipient folder creation default/toggle, directory-scoped link, actual upload, file display/rename/move, theme switching, API-key creation/revocation and collection navigation.
@@ -32,3 +32,7 @@ The current architecture streams files through the Worker's R2 binding. S3 API c
 - Perform a broader accessibility/security review and longer workload testing if using this beyond modest personal/team workloads.
 
 `tests/staging/worker.js` is verification-only. Production `wrangler.jsonc` points directly to `src/index.js` and does not expose the cleanup-test endpoint. To repeat staging tests, create an isolated staging config/resources, set FOLVIO_STAGING_ORIGIN if needed, and run `npm run test:staging`. The script creates ephemeral test login secrets, exercises transfers and removes uploaded test objects; resource deletion follows separately.
+
+## Default deployment regression
+
+A fresh `npx wrangler deploy` created the isolated D1 database and R2 bucket automatically with no database ID in its configuration. The first `/api/session` request returned 200 and all three migration records were confirmed in remote D1. The verification resources were deleted afterwards. Local tests also cover simultaneous first-request initialization and cold restart idempotence; browser/runtime tests start from empty databases.

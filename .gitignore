@@ -12,3 +12,4 @@ cors.staging.json
 .env.*
 .DS_Store
 *.log
+wrangler.verify.json

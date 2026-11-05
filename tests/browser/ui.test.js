@@ -37,10 +37,6 @@ test("desktop and mobile collection wizard, folder controls, recipient permissio
   let browser;
   try {
     const db = await mf.getD1Database("DB");
-    for (const f of (await readdir("migrations")).sort())
-      await db.exec(
-        (await readFile("migrations/" + f, "utf8")).replace(/\n/g, " "),
-      );
     browser = await puppeteer.launch({
       headless: true,
       executablePath:

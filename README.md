@@ -76,6 +76,16 @@ Change folders or collection settings later without changing the public URL.
 
 The button targets `momardia54/folvio`. Push this source to GitHub before using the button. The CLI installer below automatically finds or creates the D1 database and R2 bucket, applies migrations, configures abandoned-multipart cleanup, and deploys the Worker.
 
+### Cloudflare dashboard / Git-connected builds
+
+Cloudflare's default `npx wrangler deploy` command is supported. `npm run build` is an optional build command. The repository intentionally omits account-specific D1 IDs: Wrangler provisions or resolves the named D1 database and R2 bucket automatically. The Worker applies bundled database migrations on its first API request, with migration records preventing duplicate work.
+
+If upgrading from the initial commit that failed with **10021**, push the corrected `wrangler.jsonc` (without `database_id: "replace-after-creation"`) and retry the build. Keep the R2 bucket already created by that run; Wrangler reuses the named resources. No dashboard command changes or manual database ID are required.
+
+`npm run deploy` remains available for CLI installation; it also configures a one-day abandoned-multipart lifecycle rule. Raw Wrangler deployment uses the bucket's lifecycle settings plus Folvio's hourly cleanup.
+
+For non-production branches, use a separate Worker/database configuration; do not point preview deployments at production data.
+
 ### CLI installation
 
 Use Node 22.13 or newer. Activate R2 in your Cloudflare account first; a payment method may be required even within the free allowance.
@@ -169,7 +179,7 @@ wrangler.jsonc       Worker, D1, R2 and scheduled cleanup configuration
 
 ## Updating and backups
 
-Back up D1 and R2 before upgrading. Keep both: database metadata identifies each file's collection, folder and storage key. Apply new migrations with `npm run migrate:remote`, then run `npm run deploy`. Released migrations should never be edited. Read [CHANGELOG.md](CHANGELOG.md) for compatibility changes.
+Back up D1 and R2 before upgrading. Keep both: database metadata identifies each file's collection, folder and storage key. The Worker applies new migrations automatically on its first API request after an update. `npm run migrate:remote` is also available when the local config has a resolved D1 ID. Released migrations should never be edited. Read [CHANGELOG.md](CHANGELOG.md) for compatibility changes.
 
 There is no built-in backup/export tool yet; it is tracked in [ROADMAP.md](ROADMAP.md).
 
